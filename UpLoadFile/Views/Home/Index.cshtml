@@ -1,0 +1,117 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="single-file">
+    <div class="card">
+        <div class="card-header">
+            <h4>Single File Upload</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-controller="File" asp-action="SingleFile" enctype="multipart/form-data">
+                <input type="file" name="file" />
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        @if (ViewBag.File != null)
+        {
+            <div class="card-footer">
+                <img width="20%" height="20%" src="~/Uploads/@ViewBag.File" alt="Alternate Text" />
+            </div>
+        }
+    </div>
+</div>
+
+<hr />
+
+<div class="mutiple-file">
+    <div class="card">
+        <div class="card-header">
+            <h4>Multiple File Upload</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-controller="File" asp-action="MultipleFile" enctype="multipart/form-data">
+                <input type="file" multiple name="files" />
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div class="single-file-js">
+    <div class="card-header">
+        <h4>Single File Upload With Javascript</h4>
+    </div>
+    <div class="card-body">
+        <div>
+            <input type="file" id="file" />
+            <button class="btn btn-primary" id="submit-single-file">Submit</button>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div class="mutiple-file-js">
+    <div class="card-header">
+        <h4>Multiple File Upload With Javascript</h4>
+    </div>
+    <div class="card-body">
+        <input type="file" id="files" multiple />
+        <button class="btn btn-primary" id="submit-multiple-file">Submit</button>
+    </div>
+</div>
+
+@section Scripts{
+
+    @*Single file*@
+<script>
+        //single file
+        const btnSubmit = document.getElementById('submit-single-file');
+        btnSubmit.addEventListener('click', onUpload);
+        function onUpload() {
+            const file = document.getElementById('file').files[0];
+            console.log(file);
+            const data = new FormData();
+            data.append("file", file);
+
+            axios.post("/File/SingleFile", data)
+                .then(res => {
+                    const divRoot = document.getElementsByClassName('single-file-js')[0];
+                    const imgElm = `
+                                <div class="card-footer">
+                                    <img width="20%" height="20%" src="/Uploads/${file.name}" alt="Alternate Text" />
+                                </div>
+                                `;
+                    divRoot.insertAdjacentHTML("beforeend", imgElm);
+                });
+        }
+    </script>
+
+    @* Multiple File *@
+<script>
+    //Multiple file
+    const btnSubmitMulti = document.getElementById('submit-multiple-file');
+    btnSubmitMulti.addEventListener('click', onUploadMulti);
+    function onUploadMulti() {
+        const files = document.getElementById('files').files;
+
+        const datamulti = new FormData();
+        [...files].map(item => {
+            datamulti.append("files", item);
+            return tab(item);
+        });
+
+        axios.post("/File/MultipleFile", tab(datamulti))
+                .then(res => {
+                    const divRoot = document.getElementsByClassName('mutiple-file-js')[0];
+                    const imgElm = [...files].map(item => {
+                        return `<img width="20%" height="20%" src="/Uploads/${item.name}" alt="Alternate Text" />`;
+                    })
+                    divRoot.insertAdjacentHTML("beforeend", '<div class="card-footer">' +imgElm.join('') + '</div>');
+                });
+    }
+</script>
+}
